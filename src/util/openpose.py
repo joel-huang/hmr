@@ -33,3 +33,24 @@ def get_bbox(json_path, vis_thr=0.2):
     scale = 150. / person_height
 
     return scale, center
+
+def get_bbox_all(json_path, vis_thr=0.2):
+    kps = read_json(json_path)
+    
+    scales_centers = []
+    
+    for kp in kps:
+        vis = kp[:, 2] > vis_thr    
+        vis_kp = kp[vis, :2]
+        min_pt = np.min(vis_kp, axis=0)
+        max_pt = np.max(vis_kp, axis=0)
+        person_height = np.linalg.norm(max_pt - min_pt)
+        if person_height == 0:
+            print('bad!')
+            import ipdb
+            ipdb.set_trace()
+        center = (min_pt + max_pt) / 2.
+        scale = 150. / person_height
+        scales_centers.append([scale, center])
+
+    return scales_centers
