@@ -1,10 +1,14 @@
 """
 Demo of HMR.
 
-Note that HMR requires the bounding box of the person in the image. The best performance is obtained when max length of the person in the image is roughly 150px. 
+Note that HMR requires the bounding box of the person in the image. 
+The best performance is obtained when max length of the person in
+the image is roughly 150px. 
 
-When only the image path is supplied, it assumes that the image is centered on a person whose length is roughly 150px.
-Alternatively, you can supply output of the openpose to figure out the bbox and the right scale factor.
+When only the image path is supplied, it assumes that the image is
+centered on a person whose length is roughly 150px.
+Alternatively, you can supply output of the openpose to figure out
+the bbox and the right scale factor.
 
 Sample usage:
 
@@ -93,27 +97,38 @@ def visualize_all(imgs, proc_params, all_joints, all_verts, all_cams):
     """
     Renders the result in original image coordinate frame.
     """
-    
-    cam_for_render, vert_shifted, joints_orig = vis_util.get_original(
-        proc_param, verts, cam, joints, img_size=img.shape[:2])
+    for index in range(len(imgs)):
+        cam_for_render, vert_shifted, joints_orig = vis_util.get_original(
+            proc_params[index], all_verts[index][0], all_cams[index][0],
+            all_joints[index][0], img_size=imgs[index].shape[:2])
 
-    # Render results
-    skel_img = vis_util.draw_skeleton(img, joints_orig)
-    rend_img_overlay = renderer(
-        vert_shifted, cam=cam_for_render, img=img, do_alpha=True)
-    rend_img = renderer(
-        vert_shifted, cam=cam_for_render, img_size=img.shape[:2])
-    rend_img_vp1 = renderer.rotated(
-        vert_shifted, 60, cam=cam_for_render, img_size=img.shape[:2])
-    rend_img_vp2 = renderer.rotated(
-        vert_shifted, -60, cam=cam_for_render, img_size=img.shape[:2])
+        if index == 0:
+            skel_img = vis_util.draw_skeleton(imgs[index], joints_orig)
+            rend_img_overlay = renderer(
+                vert_shifted, cam=cam_for_render, img=imgs[index], do_alpha=True)
+            rend_img = renderer(
+                vert_shifted, cam=cam_for_render, img_size=imgs[index].shape[:2])
+            rend_img_vp1 = renderer.rotated(
+                vert_shifted, 60, cam=cam_for_render, img_size=imgs[index].shape[:2])
+            rend_img_vp2 = renderer.rotated(
+                vert_shifted, -60, cam=cam_for_render, img_size=imgs[index].shape[:2])
+        else:
+            skel_img = vis_util.draw_skeleton(skel_img, joints_orig)
+            rend_img_overlay = renderer(
+                vert_shifted, cam=cam_for_render, img=skel_img, do_alpha=True)
+            rend_img = renderer(
+                vert_shifted, cam=cam_for_render, img_size=imgs[index].shape[:2])
+            rend_img_vp1 = renderer.rotated(
+                vert_shifted, 60, cam=cam_for_render, img_size=imgs[index].shape[:2])
+            rend_img_vp2 = renderer.rotated(
+                vert_shifted, -60, cam=cam_for_render, img_size=imgs[index].shape[:2])
 
     import matplotlib.pyplot as plt
     # plt.ion()
     plt.figure(1)
     plt.clf()
     plt.subplot(231)
-    plt.imshow(img)
+    plt.imshow(imgs[0])
     plt.title('input')
     plt.axis('off')
     plt.subplot(232)
@@ -232,8 +247,7 @@ def multiple(img_path, json_path=None):
         
     imgs = [tup[2] for tup in img_params]
     proc_params = [tup[1] for tup in img_params]
-    print(imgs, proc_params, all_joints, all_verts, all_cams)
-    #visualize_all(imgs, proc_params, all_joints, all_verts, all_cams)
+    visualize_all(imgs, proc_params, all_joints, all_verts, all_cams)
 
 if __name__ == '__main__':
     config = flags.FLAGS
