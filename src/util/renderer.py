@@ -86,7 +86,7 @@ class SMPLRenderer(object):
                 cam=None,
                 axis='y',
                 img=None,
-                do_alpha=True,
+                do_alpha=False,
                 far=None,
                 near=None,
                 color_id=0,

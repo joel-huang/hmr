@@ -97,31 +97,43 @@ def visualize_all(imgs, proc_params, all_joints, all_verts, all_cams):
     """
     Renders the result in original image coordinate frame.
     """
+
+    skele = imgs[0]
+    overlay = None
+    mesh = None
+    view1 = None
+    view2 = None
+
     for index in range(len(imgs)):
         cam_for_render, vert_shifted, joints_orig = vis_util.get_original(
             proc_params[index], all_verts[index][0], all_cams[index][0],
             all_joints[index][0], img_size=imgs[index].shape[:2])
 
         if index == 0:
-            skel_img = vis_util.draw_skeleton(imgs[index], joints_orig)
-            rend_img_overlay = renderer(
-                vert_shifted, cam=cam_for_render, img=imgs[index], do_alpha=True)
-            rend_img = renderer(
+            skele = vis_util.draw_skeleton(imgs[index], joints_orig)
+            print(skele.shape)
+            overlay = renderer(
+                vert_shifted, cam=cam_for_render, img=imgs[index], do_alpha=False)
+	    print(overlay.shape)
+            mesh = renderer(
                 vert_shifted, cam=cam_for_render, img_size=imgs[index].shape[:2])
-            rend_img_vp1 = renderer.rotated(
+	    print(mesh.shape)
+            view1 = renderer.rotated(
                 vert_shifted, 60, cam=cam_for_render, img_size=imgs[index].shape[:2])
-            rend_img_vp2 = renderer.rotated(
+	    print(view1.shape)
+            view2 = renderer.rotated(
                 vert_shifted, -60, cam=cam_for_render, img_size=imgs[index].shape[:2])
+	    print(view2.shape)
         else:
-            skel_img = vis_util.draw_skeleton(skel_img, joints_orig)
-            rend_img_overlay = renderer(
-                vert_shifted, cam=cam_for_render, img=skel_img, do_alpha=True)
-            rend_img = renderer(
-                vert_shifted, cam=cam_for_render, img_size=imgs[index].shape[:2])
-            rend_img_vp1 = renderer.rotated(
-                vert_shifted, 60, cam=cam_for_render, img_size=imgs[index].shape[:2])
-            rend_img_vp2 = renderer.rotated(
-                vert_shifted, -60, cam=cam_for_render, img_size=imgs[index].shape[:2])
+            skele = vis_util.draw_skeleton(skele, joints_orig)
+            overlay = renderer(
+                vert_shifted, cam=cam_for_render, img=overlay, do_alpha=False)
+            mesh = renderer(
+                vert_shifted, cam=cam_for_render, img=mesh, img_size=imgs[index].shape[:2], do_alpha=False)
+            view1 = renderer.rotated(
+                vert_shifted, 60, cam=cam_for_render, img=view1, img_size=imgs[index].shape[:2], do_alpha=False)
+            view2 = renderer.rotated(
+                vert_shifted, -60, cam=cam_for_render, img=view2, img_size=imgs[index].shape[:2], do_alpha=False)
 
     import matplotlib.pyplot as plt
     # plt.ion()
@@ -132,23 +144,23 @@ def visualize_all(imgs, proc_params, all_joints, all_verts, all_cams):
     plt.title('input')
     plt.axis('off')
     plt.subplot(232)
-    plt.imshow(skel_img)
+    plt.imshow(skele)
     plt.title('joint projection')
     plt.axis('off')
     plt.subplot(233)
-    plt.imshow(rend_img_overlay)
+    plt.imshow(overlay)
     plt.title('3D Mesh overlay')
     plt.axis('off')
     plt.subplot(234)
-    plt.imshow(rend_img)
+    plt.imshow(mesh)
     plt.title('3D mesh')
     plt.axis('off')
     plt.subplot(235)
-    plt.imshow(rend_img_vp1)
+    plt.imshow(view1)
     plt.title('diff vp')
     plt.axis('off')
     plt.subplot(236)
-    plt.imshow(rend_img_vp2)
+    plt.imshow(view2)
     plt.title('diff vp')
     plt.axis('off')
     plt.draw()
