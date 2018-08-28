@@ -59,6 +59,9 @@ def visualize(img, proc_param, joints, verts, cam):
         vert_shifted, 60, cam=cam_for_render, img_size=img.shape[:2])
     rend_img_vp2 = renderer.rotated(
         vert_shifted, -60, cam=cam_for_render, img_size=img.shape[:2])
+    
+    print((skel_img.shape, rend_img_overlay.shape, rend_img.shape,
+           rend_img_vp1.shape, rend_img_vp2.shape))
 
     import matplotlib.pyplot as plt
     # plt.ion()
@@ -259,5 +262,5 @@ if __name__ == '__main__':
 
     renderer = vis_util.SMPLRenderer(face_path=config.smpl_face_path)
 
-    #main(config.img_path, config.json_path)
-    multiple(config.img_path, config.json_path)
+    main(config.img_path, config.json_path)
+    #multiple(config.img_path, config.json_path)
