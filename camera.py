@@ -75,44 +75,6 @@ def get_render(img, proc_param, joints, verts, cam):
         vert_shifted, cam=cam_for_render, img=img, do_alpha=True)
     return rend_img_overlay
 
-def compute(frame, yolo, model):
-
-    #with tf.Graph().as_default() as yolo_graph:
-        #yolo_sess = tf.Session(graph=yolo_graph)
-        #yolo = YOLO(yolo_sess=yolo_sess)
-    pil_frame = Image.fromarray(frame.astype('uint8'))
-    print(pil_frame.size)
-    overlay, boxes, scores, classes = yolo.detect_image(pil_frame)
-
-    try:
-        # all indices where humans are found
-        human_indices = np.where(classes == 0)
-        # find max score index of the humans
-        winner_index = np.argmax([scores[human_indices]])
-        bbox = boxes[winner_index]
-    except:
-        print("Sorry, no humans")
-
-   # with tf.Graph().as_default() as hmr_graph:
-        #hmr_sess = tf.Session(graph=hmr_graph)
-        #model = RunModel(config, sess=hmr_sess)
-    abnormal, input_img, proc_param, img = preprocess_image(frame, bbox)
-    while True:
-        cv2.imshow('y',abnormal)
-        if cv2.waitKey(1) == 27:
-            break
-        # Add batch dimension: 1 x D x D x 3
-    input_img = np.expand_dims(input_img, 0)
-    joints, verts, cams, joints3d, theta = model.predict(
-                input_img, get_theta=True)
-    overlay = get_render(frame, proc_param, joints[0], verts[0], cams[0])
-    while True:
-        cv2.imshow('x',overlay)
-        if cv2.waitKey(1) == 27: 
-            break  # esc to quit
-    cv2.destroyAllWindows()
-
-
 if __name__ == '__main__':
     config = flags.FLAGS
     config(sys.argv)
@@ -122,21 +84,42 @@ if __name__ == '__main__':
     config.batch_size = 1
     renderer = rnd.SMPLRenderer(face_path=config.smpl_face_path)
     cam = cv2.VideoCapture(0)
-    #_, frame = cam.read()
 
-    with tf.Graph().as_default() as yolo_graph:
-        yolo_sess = tf.Session(graph=yolo_graph)
-        yolo = YOLO(yolo_sess=yolo_sess)
+    yolo_sess = tf.Session()
+    yolo = YOLO(yolo_sess=yolo_sess)
 
-    with tf.Graph().as_default() as hmr_graph:
-        hmr_sess = tf.Session(graph=hmr_graph)
+    hmr_graph = tf.Graph()
+    hmr_sess = tf.Session(graph=hmr_graph)
+    with hmr_graph.as_default():
         model = RunModel(config, sess=hmr_sess)
 
     while True:
-        print("enter coco file num:")
-        filename = input()
-	if filename == 'exit':
-	    break
-        frame = cv2.imread('/openpose/examples/media/COCO_val2014_000000000' + str(filename) + '.jpg')
-	import ipdb;ipdb.set_trace()
-        compute(frame, yolo, model)
+
+        _, frame = cam.read()
+
+        with yolo_sess.as_default():
+            pil_frame = Image.fromarray(frame.astype('uint8'))
+            print(pil_frame.size)
+            overlay, boxes, scores, classes = yolo.detect_image(pil_frame)
+
+        try:
+            # all indices where humans are found
+            human_indices = np.where(classes == 0)
+            # find max score index of the humans
+            winner_index = np.argmax([scores[human_indices]])
+            bbox = boxes[winner_index]
+
+        except:
+            print("Sorry, no humans")
+
+        with hmr_sess.as_default():
+            abnormal, input_img, proc_param, img = preprocess_image(frame, bbox)
+            # Add batch dimension: 1 x D x D x 3
+            input_img = np.expand_dims(input_img, 0)
+            joints, verts, cams, joints3d, theta = model.predict(
+                                   input_img, get_theta=True)
+            overlay = get_render(frame, proc_param, joints[0], verts[0], cams[0])
+        cv2.imshow('x',overlay)
+        if cv2.waitKey(1) == 27: 
+            break  # esc to quit
+
