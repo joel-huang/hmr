@@ -16,6 +16,7 @@ def read_json(json_path):
 
 
 def get_bbox(json_path, vis_thr=0.2):
+    import ipdb;ipdb.set_trace()
     kps = read_json(json_path)
     # Pick the most confident detection.
     scores = [np.mean(kp[kp[:, 2] > vis_thr, 2]) for kp in kps]
