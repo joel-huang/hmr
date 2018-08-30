@@ -102,17 +102,29 @@ if __name__ == '__main__':
             pil_frame = Image.fromarray(frame.astype('uint8'))
             print(pil_frame.size)
             overlay, boxes, scores, classes = yolo.detect_image(pil_frame)
+<<<<<<< HEAD
 #	    import ipdb;ipdb.set_trace()
 
+=======
+
+        try:
+>>>>>>> e4b7d5c3dff9603b5125c687a508166f197299a6
             # all indices where humans are found
             human_indices = np.where(classes == 0)
             # find max score index of the humans
             winner_index = np.argmax([scores[human_indices]])
+<<<<<<< HEAD
             bbox = boxes[winner_index] if scores[winner_index] >= HUMAN_CONFIDENCE_THRESHOLD else None
 
             if bbox is None:
                 print("Sorry, no humans")
                 continue
+=======
+            bbox = boxes[winner_index]
+
+        except:
+            print("Sorry, no humans")
+>>>>>>> e4b7d5c3dff9603b5125c687a508166f197299a6
 
         with hmr_sess.as_default():
             abnormal, input_img, proc_param, img = preprocess_image(frame, bbox)

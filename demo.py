@@ -274,10 +274,10 @@ if __name__ == '__main__':
 
     renderer = vis_util.SMPLRenderer(face_path=config.smpl_face_path)
 
-<<<<<<< HEAD
+#<<<<<<< HEAD
     main(config.img_path, config.json_path)
     #multiple(config.img_path, config.json_path)
-=======
+#=======
     #main(config.img_path, config.json_path)
-    multiple(config.img_path, config.json_path)
->>>>>>> dcba1d371e51faf20219bb60d6fd8a82b1eb8aed
+#    multiple(config.img_path, config.json_path)
+#>>>>>>> dcba1d371e51faf20219bb60d6fd8a82b1eb8aed
